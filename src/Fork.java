@@ -18,5 +18,13 @@ public class Fork implements TableLocation{
         return String.format("Вилка_%d",forkNumber);
     }
 
+    @Override
     public void starting(){}
+
+    @Override
+    public void setFork(Fork f1, Fork f2) {}
+
+
+
+
 }
