@@ -1,5 +1,5 @@
 
-public class Fork implements TableLocation{
+public class Fork extends Thread implements TableLocation{
     private boolean isUsing = false;
     private int forkNumber;
 

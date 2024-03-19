@@ -57,19 +57,31 @@ public class Sage extends Thread implements TableLocation {
     public void run() {
         while (true) {
 
-            takeForks();
+            try {
+                takeFork();
+                sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
 
         }
     }
 
-
-    private boolean takeForks() {
-        for (int i = 1; i < 10; i+=2){
-            if (rigthHand.getFork() && leftHand.getFork())
-                return true;
+    private boolean takeFork(){
+        if (!rigthHand.getFork() && !leftHand.getFork()){
+            rigthHand.start();
+            leftHand.start();
+            rigthHand.changeForkStatus();
+            leftHand.changeForkStatus();
+            sageEating();
+            return true;
+        } else{
+            sageThinking();
+            return false;
         }
-        return false;
     }
+
 
 
     public void starting() {
