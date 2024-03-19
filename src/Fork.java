@@ -1,4 +1,3 @@
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Fork implements TableLocation{
     private boolean isUsing = false;
@@ -11,8 +10,13 @@ public class Fork implements TableLocation{
     public void changeForkStatus(){
         isUsing = !isUsing;
     }
+    public boolean getFork(){
+        return isUsing;
+    }
     @Override
     public String toString(){
         return String.format("Вилка_%d",forkNumber);
     }
+
+    public void starting(){}
 }
