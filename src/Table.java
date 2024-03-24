@@ -1,39 +1,66 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
-public class Table {
+public class Table extends Thread{
 
-    private static List<TableLocation> table = new ArrayList<>();
+    private final int SAGE_COUNT = 5;
+    private Fork[] forks;
+    private Sage[] sages;
+    private CountDownLatch cdl;
+    private List<String> finalList = new ArrayList<>();
 
-    public static void createTable() {
-        for (int i = 1; i <= 5; i++) {
-            table.add(new Fork(i));
-            table.add(new Sage());
+    public Table() {
+        forks = new Fork[SAGE_COUNT];
+        sages = new Sage[SAGE_COUNT];
+        cdl = new CountDownLatch(SAGE_COUNT);
+        init();
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Мудрецы собрались за столом покушать и поговорить.");
+        try {
+            thinkingProcess();
+            cdl.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException();
         }
-        setForks(table);
+        System.out.println("Все философы наелись в таком порядке:");
+        for (int i = 0; i < finalList.size(); i++){
+            System.out.println(i+1 + " " + finalList.get(i));
+        }
+    }
+    public void fillFinalList(String s){
+        finalList.add(s);
     }
 
-    private static void setForks(List<TableLocation> lst) {
-        for (int i = 1; i < lst.size(); i += 2) {
-            if (i < 9) {
-                Fork f2 = (Fork) lst.get(i - 1);
-                Fork f1 = (Fork) lst.get(i + 1);
-                lst.get(i).setFork(f1, f2);
-            } else {
-                Fork f1 = (Fork) lst.get(0);
-                Fork f2 = (Fork) lst.get(i - 1);
-                lst.get(i).setFork(f1, f2);
-            }
+    public synchronized boolean tryGetForks(int leftFork, int rightFork) {
+        if (!forks[leftFork].isUsing() && !forks[rightFork].isUsing()){
+            forks[leftFork].setUsing(true);
+            forks[rightFork].setUsing(true);
+            return true;
+        }
+        return false;
+    }
+
+    public void putForks(int leftFork, int rightFork) {
+        forks[leftFork].setUsing(false);
+        forks[rightFork].setUsing(false);
+    }
+
+    private void init() {
+        for (int i = 0; i < SAGE_COUNT; i++) {
+            forks[i] = new Fork();
+        }
+        for (int i = 0; i < SAGE_COUNT; i++) {
+            sages[i] = new Sage(this, i, (i + 1) % SAGE_COUNT, cdl);
         }
     }
 
-    public static List<TableLocation> getTable() {
-        return table;
-    }
-
-    public static void starting() {
-        for (int i = 1; i < 10; i += 2) {
-            getTable().get(i).starting();
+    private void thinkingProcess() {
+        for (Sage sage : sages) {
+            sage.start();
         }
     }
 }
